@@ -16,10 +16,19 @@ static TextLayer *s_water_value_layer;
 static TextLayer *s_coffee_header_layer;
 static TextLayer *s_coffee_value_layer;
 
+//images
+static BitmapLayer *s_water_image_layer;
+static GBitmap *s_water_image;
+static BitmapLayer *s_coffee_image_layer;
+static GBitmap *s_coffee_image;
+
+//Color
+static GColor s_value_text_color = GColorWhite;
+
 #define waterOzingrams 28.3495
 #define HEADER_HEIGHT PBL_IF_ROUND_ELSE(40, HEADER_HEIGHT_RECT)
 #define HEADER_PADDING PBL_IF_ROUND_ELSE(0, HEADER_HEIGHT_RECT)
-#define CENTER_V_OFFSET 30
+#define CENTER_V_OFFSET 20
 
 // Forward declaration
 static void update_display(void);
@@ -94,6 +103,12 @@ static void update_display(void)
     
 }
 
+//add in for if i want to add in a background to text bubbles
+// static void layer_update_proc(Layer *layer, GContext *ctx)
+// {
+    
+// }
+
 static void window_load(Window *window)
 {
     Layer *window_layer = window_get_root_layer(window);
@@ -103,6 +118,18 @@ static void window_load(Window *window)
     s_header_container_layer = text_layer_create(GRect(0, 0, bounds.size.w, HEADER_HEIGHT));
     text_layer_set_background_color(s_header_container_layer, GColorBlack);
     int font_height = 30;
+
+    //image loading
+    s_water_image = gbitmap_create_with_resource(RESOURCE_ID_WATER_COLOR_ICON);
+    GRect water_image_bounds = gbitmap_get_bounds(s_water_image);
+    s_coffee_image = gbitmap_create_with_resource(RESOURCE_ID_COFFEE_WHITE_ICON);
+    GRect coffee_image_bounds = gbitmap_get_bounds(s_coffee_image);
+
+    // int top_y_rect = bounds.size.h/2 - font_height/2 - CENTER_V_OFFSET - water_image_bounds.size.h/2;
+    // int bottom_y_rect = bounds.size.h/2 - font_height/2 + CENTER_V_OFFSET + coffee_image_bounds.size.h/2 + font_height;
+    // int rect_height = bottom_y_rect - top_y_rect;
+
+   
 
     // fixed header layer
     s_header_layer = text_layer_create(GRect(0, HEADER_HEIGHT - font_height, bounds.size.w, font_height));
@@ -114,48 +141,67 @@ static void window_load(Window *window)
     text_layer_set_overflow_mode(s_header_layer, GTextOverflowModeTrailingEllipsis);
 
     //water header layer 
-    s_water_header_layer = text_layer_create(GRect(0, bounds.size.h/2 - font_height/2 - CENTER_V_OFFSET, bounds.size.w/2, font_height));
+    s_water_header_layer = text_layer_create(GRect(0, bounds.size.h/2 - font_height/2 - CENTER_V_OFFSET - water_image_bounds.size.h/2, bounds.size.w/2, font_height));
     text_layer_set_text(s_water_header_layer, "Water");
     text_layer_set_text_alignment(s_water_header_layer, GTextAlignmentCenter);
     text_layer_set_font(s_water_header_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-    text_layer_set_text_color(s_water_header_layer, GColorWhite);
+    text_layer_set_text_color(s_water_header_layer, s_value_text_color);
     text_layer_set_background_color(s_water_header_layer, GColorClear);
     layer_add_child(window_layer, text_layer_get_layer(s_water_header_layer));
 
     //coffee header layer 
-    s_coffee_header_layer = text_layer_create(GRect(bounds.size.w/2, bounds.size.h/2 - font_height/2 - CENTER_V_OFFSET, bounds.size.w/2, font_height));
+    s_coffee_header_layer = text_layer_create(GRect(bounds.size.w/2, bounds.size.h/2 - font_height/2 - CENTER_V_OFFSET - coffee_image_bounds.size.h/2, bounds.size.w/2, font_height));
     text_layer_set_text(s_coffee_header_layer, "Coffee");
     text_layer_set_text_alignment(s_coffee_header_layer, GTextAlignmentCenter);
     text_layer_set_font(s_coffee_header_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-    text_layer_set_text_color(s_coffee_header_layer, GColorWhite);
+    text_layer_set_text_color(s_coffee_header_layer, s_value_text_color);
     text_layer_set_background_color(s_coffee_header_layer, GColorClear);
     layer_add_child(window_layer, text_layer_get_layer(s_coffee_header_layer));
 
 
     //water value layer 
-    s_water_value_layer = text_layer_create(GRect(0, bounds.size.h/2 - font_height/2 + CENTER_V_OFFSET, bounds.size.w/2, font_height));
+    s_water_value_layer = text_layer_create(GRect(0, bounds.size.h/2 - font_height/2 + CENTER_V_OFFSET + water_image_bounds.size.h/2, bounds.size.w/2, font_height));
     text_layer_set_text_alignment(s_water_value_layer, GTextAlignmentCenter);
     text_layer_set_font(s_water_value_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-    text_layer_set_text_color(s_water_value_layer, GColorWhite);
+    text_layer_set_text_color(s_water_value_layer, s_value_text_color);
     text_layer_set_background_color(s_water_value_layer, GColorClear);
     layer_add_child(window_layer, text_layer_get_layer(s_water_value_layer));
 
     //coffee value layer 
-    s_coffee_value_layer = text_layer_create(GRect(bounds.size.w/2, bounds.size.h/2 - font_height/2 + CENTER_V_OFFSET, bounds.size.w/2, font_height));
+    s_coffee_value_layer = text_layer_create(GRect(bounds.size.w/2, bounds.size.h/2 - font_height/2 + CENTER_V_OFFSET + coffee_image_bounds.size.h/2, bounds.size.w/2, font_height));
     text_layer_set_text_alignment(s_coffee_value_layer, GTextAlignmentCenter);
     text_layer_set_font(s_coffee_value_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-    text_layer_set_text_color(s_coffee_value_layer, GColorWhite);
+    text_layer_set_text_color(s_coffee_value_layer, s_value_text_color);
     text_layer_set_background_color(s_coffee_value_layer, GColorClear);
     layer_add_child(window_layer, text_layer_get_layer(s_coffee_value_layer));
 
-    s_bottom_header_layer = text_layer_create(GRect(0, bounds.size.h - HEADER_HEIGHT, bounds.size.w, HEADER_HEIGHT));
+    //water image layer
+    s_water_image_layer = bitmap_layer_create(GRect(0, bounds.size.h/2 - water_image_bounds.size.h/2, bounds.size.w/2, water_image_bounds.size.h));
+    bitmap_layer_set_bitmap(s_water_image_layer, s_water_image);
+    bitmap_layer_set_compositing_mode(s_water_image_layer, GCompOpSet);
+    bitmap_layer_set_alignment(s_water_image_layer, GAlignCenter);
+    layer_add_child(window_layer, bitmap_layer_get_layer(s_water_image_layer));
+
+    //coffee image layer
+    s_coffee_image_layer = bitmap_layer_create(GRect(bounds.size.w/2, bounds.size.h/2 - coffee_image_bounds.size.h/2, bounds.size.w/2, coffee_image_bounds.size.h));
+    bitmap_layer_set_bitmap(s_coffee_image_layer, s_coffee_image);
+    bitmap_layer_set_compositing_mode(s_coffee_image_layer, GCompOpSet);
+    bitmap_layer_set_alignment(s_coffee_image_layer, GAlignCenter);
+    layer_add_child(window_layer, bitmap_layer_get_layer(s_coffee_image_layer));
+
+    //bottom header
+    int bottom_text_start_height = bounds.size.h/2 + font_height + CENTER_V_OFFSET + coffee_image_bounds.size.h/2;
+    int bottom_header_font_height = get_font_pixel_height(fonts_get_system_font(FONT_KEY_GOTHIC_24), "Based on Roast Level");
+    s_bottom_header_layer = text_layer_create(GRect(0, bottom_text_start_height, bounds.size.w, HEADER_HEIGHT));
     text_layer_set_text(s_bottom_header_layer, "Based on Roast Level");
     text_layer_set_text_alignment(s_bottom_header_layer, GTextAlignmentCenter);
-    text_layer_set_font(s_bottom_header_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-    text_layer_set_background_color(s_bottom_header_layer, GColorBlack);
+    text_layer_set_font(s_bottom_header_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+    text_layer_set_background_color(s_bottom_header_layer, GColorClear);
     text_layer_set_text_color(s_bottom_header_layer, GColorWhite);
     text_layer_set_overflow_mode(s_bottom_header_layer, GTextOverflowModeTrailingEllipsis);
     layer_add_child(window_layer, text_layer_get_layer(s_bottom_header_layer));
+
+    
 
     layer_add_child(window_layer, text_layer_get_layer(s_header_container_layer));
     layer_add_child(window_layer, text_layer_get_layer(s_header_layer));
@@ -170,6 +216,20 @@ static void window_unload(Window *window)
     text_layer_destroy(s_instruction_layer);
     text_layer_destroy(s_header_layer);
     text_layer_destroy(s_header_container_layer);
+    text_layer_destroy(s_water_header_layer);      
+    text_layer_destroy(s_coffee_header_layer);     
+    text_layer_destroy(s_water_value_layer);       
+    text_layer_destroy(s_coffee_value_layer);      
+    text_layer_destroy(s_bottom_header_layer);    
+    
+    bitmap_layer_destroy(s_water_image_layer);
+    gbitmap_destroy(s_water_image);
+
+    bitmap_layer_destroy(s_coffee_image_layer);
+    gbitmap_destroy(s_coffee_image);
+
+    window_destroy(s_window);
+    s_window = NULL;
 }
 
 void water_screen_push(void)

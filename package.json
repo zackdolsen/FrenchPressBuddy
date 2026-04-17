@@ -1,22 +1,17 @@
 {
   "name": "FrenchPressBuddy",
-  "author": "MakeAwesomeHappen",
+  "author": "Dolsen Development",
   "version": "1.0.0",
   "keywords": ["pebble-app"],
   "private": true,
   "dependencies": {},
   "pebble": {
-    "displayName": "FrenchPressBuddy",
+    "displayName": "French Press Buddy",
     "uuid": "2f00a098-b303-4e47-88bf-516aed00c7dc",
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
-      "aplite",
-      "basalt",
-      "chalk",
-      "diorite",
       "emery",
-      "flint",
       "gabbro"
     ],
     "watchapp": {
@@ -26,7 +21,44 @@
       "dummy"
     ],
     "resources": {
-      "media": []
+      "media": [
+        {
+          "type": "png",
+          "name": "COFFEE_ICON",
+          "file": "images/Coffee48.png"
+        },
+        {
+          "type": "png",
+          "name": "WATER_ICON",
+          "file": "images/Water48.png"
+        },
+        {
+          "type": "png",
+          "name": "COFFEE_WHITE_ICON",
+          "file": "images/CoffeeWhite48.png"
+        },
+        {
+          "type": "png",
+          "name": "WATER_WHITE_ICON",
+          "file": "images/WaterWhite48.png"
+        },
+        {
+          "type": "png",
+          "name": "COFFEE_COLOR_ICON",
+          "file": "images/CoffeeColor48.png"
+        },
+        {
+          "type": "png",
+          "name": "WATER_COLOR_ICON",
+          "file": "images/WaterColor48.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "MENU_ICON",
+          "file": "images/AppIcon.png",
+          "menuIcon": true
+        }
+      ]
     }
   }
 }
