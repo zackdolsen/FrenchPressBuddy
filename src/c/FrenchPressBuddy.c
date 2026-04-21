@@ -3,6 +3,7 @@
 #include "RoastScreen.h"
 #include "WaterScreen.h"
 #include "TimerScreen.h"
+#include "UIContraints.h"
 
 static void push_current_screen(void) {
   switch (app_state_get_screen()) {
@@ -20,6 +21,7 @@ static void push_current_screen(void) {
 
 static void init(void) {
   app_state_initialize();
+  watch_type_init();
 
   // Start the app at the roast selection screen.
   // To test a single screen directly, replace the current screen below or call one of:

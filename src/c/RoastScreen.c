@@ -13,6 +13,7 @@ static TextLayer *s_header_container_layer;
 // #define HEADER_HEIGHT_RECT 35
 #define HEADER_HEIGHT PBL_IF_ROUND_ELSE(40, HEADER_HEIGHT_RECT)
 #define HEADER_PADDING PBL_IF_ROUND_ELSE(0, HEADER_HEIGHT_RECT)
+#define WATCH_TYPE get_watch_type()
 
 // #define NUM_ROASTS 5
 // #define HEADER_HEIGHT_RECT 35
@@ -48,10 +49,57 @@ static int16_t menu_get_cell_height(MenuLayer *menu_layer, MenuIndex *cell_index
 
     if (selected.section == cell_index->section && selected.row == cell_index->row)
     {
-        return PBL_IF_ROUND_ELSE(MENU_CELL_ROUND_FOCUSED_SHORT_CELL_HEIGHT, MENU_CELL_BASIC_CELL_HEIGHT);
+
+        
+        switch (WATCH_TYPE)
+        {
+        case SCREEN_TYPE_OG_RECT:
+            return MENU_BASIC_CELL_HEIGHT;
+            break;
+
+        case SCREEN_TYPE_OG_ROUND:
+            return MENU_ROUND_FOCUSED_SHORT_CELL_HEIGHT;
+            break;
+
+        case SCREEN_TYPE_RECT_V2:
+            return MENU_BASIC_CELL_HEIGHT;
+            break;
+
+        case SCREEN_TYPE_ROUND_V2:
+            return MENU_ROUND_FOCUSED_TALL_CELL_HEIGHT;
+            break;
+
+        default:
+            return MENU_BASIC_CELL_HEIGHT;
+            break;
+        }
+        // return PBL_IF_ROUND_ELSE(MENU_ROUND_FOCUSED_SHORT_CELL_HEIGHT, MENU_BASIC_CELL_HEIGHT);
     }
 
-    return PBL_IF_ROUND_ELSE(MENU_CELL_ROUND_UNFOCUSED_TALL_CELL_HEIGHT, MENU_CELL_BASIC_CELL_HEIGHT);
+    switch (WATCH_TYPE)
+        {
+        case SCREEN_TYPE_OG_RECT:
+            return MENU_BASIC_CELL_HEIGHT;
+            break;
+
+        case SCREEN_TYPE_OG_ROUND:
+            return MENU_ROUND_UNFOCUSED_SHORT_CELL_HEIGHT;
+            break;
+
+        case SCREEN_TYPE_RECT_V2:
+            return MENU_BASIC_CELL_HEIGHT;
+            break;
+
+        case SCREEN_TYPE_ROUND_V2:
+            return MENU_ROUND_UNFOCUSED_TALL_CELL_HEIGHT;
+            break;
+
+        default:
+            return MENU_BASIC_CELL_HEIGHT;
+            break;
+        }
+
+    // return PBL_IF_ROUND_ELSE(MENU_ROUND_UNFOCUSED_TALL_CELL_HEIGHT, MENU_BASIC_CELL_HEIGHT);
 }
 
 static void menu_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data)

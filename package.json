@@ -1,7 +1,7 @@
 {
   "name": "FrenchPressBuddy",
   "author": "Dolsen Development",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "keywords": ["pebble-app"],
   "private": true,
   "dependencies": {},
@@ -11,7 +11,12 @@
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite",
       "emery",
+      "flint",
       "gabbro"
     ],
     "watchapp": {
@@ -35,7 +40,23 @@
         {
           "type": "png",
           "name": "COFFEE_WHITE_ICON",
-          "file": "images/CoffeeWhite48.png"
+          "file": "images/CoffeeWhite48.png",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"          
+          ]
+        },
+        {
+          "type": "png",
+          "name": "COFFEE_WHITE_ICON",
+          "file": "images/CoffeeWhite36.png",
+          "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite",
+            "flint"          
+          ]
         },
         {
           "type": "png",
@@ -50,8 +71,24 @@
         {
           "type": "png",
           "name": "WATER_COLOR_ICON",
-          "file": "images/WaterColor48.png"
+          "file": "images/WaterColor48.png",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"          
+          ]
         },
+          {
+            "type": "png",
+            "name": "WATER_COLOR_ICON",
+            "file": "images/WaterColor36.png",
+            "targetPlatforms": [
+              "aplite",
+              "basalt",
+              "chalk",
+              "diorite",
+              "flint"          
+            ]
+          },
         {
           "type": "bitmap",
           "name": "MENU_ICON",

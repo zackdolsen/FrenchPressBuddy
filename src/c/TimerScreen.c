@@ -25,6 +25,7 @@ static int min_radius = 0;
 #define SHAPEROUND PBL_IF_ROUND_ELSE(1, 0)
 #define CENTER_Y_OFFSET 4 // 4 centers the text in the circle perfectly
 #define DRAW_HEADER_OFFSET PBL_IF_ROUND_ELSE(HEADER_HEIGHT, HEADER_HEIGHT / 2 + CENTER_Y_OFFSET)
+#define WATCH_TYPE get_watch_type()
 
 // Forward declaration
 static void update_display(void *context);
@@ -119,7 +120,7 @@ static void update_canvas_layer(Layer *layer, GContext *ctx)
     // draw filler bubble behind text when timer is active
     if (s_timer_running)
     {
-        //calculate radius of white bubble
+        // calculate radius of white bubble
         if (min_radius == 0 && brown_fill_height > 0)
         {
             min_radius = text_width / 2 + CENTER_Y_OFFSET;
@@ -137,7 +138,7 @@ static void update_canvas_layer(Layer *layer, GContext *ctx)
             graphics_context_set_fill_color(ctx, GColorWhite);
             graphics_fill_circle(ctx, GPoint(xPosMiddle, yPosMiddle), min_radius);
         }
-        // for RECT drawing 
+        // for RECT drawing
         else
         {
             graphics_context_set_fill_color(ctx, GColorWhite);
@@ -163,9 +164,9 @@ static void update_canvas_layer(Layer *layer, GContext *ctx)
     }
     graphics_draw_text(ctx, s_timer_text, fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK), text_bounds, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
-    // grid for layout testing 
+    // grid for layout testing
     // graphics_context_set_fill_color(ctx, GColorBlack);
-    // graphics_fill_rect(ctx,GRect(0, yPosMiddle, bounds.size.w, 1), 0, GCornerNone);
+    // graphics_fill_rect(ctx, GRect(0, yPosMiddle, bounds.size.w, 1), 0, GCornerNone);
 }
 
 static void update_display(void *context)
@@ -186,7 +187,15 @@ static void update_display(void *context)
         s_display_sec = s_remaining_seconds % 60;
         snprintf(s_timer_text, sizeof(s_timer_text), "%01d:%02d", s_display_min, s_display_sec);
         s_timer = app_timer_register(1000, update_display, NULL); // Fire again in 1 second
-        text_layer_set_text(s_instruction_layer, "Timer active\nSELECT to stop");
+        text_layer_set_text(s_instruction_layer, "");
+        // if(PBL_IF_COLOR_ELSE(1,0))
+        // {
+        //     text_layer_set_text(s_instruction_layer, "Timer active\nSELECT to stop");
+        // }
+        // else
+        // {
+        //     text_layer_set_text(s_instruction_layer, "");
+        // }
         
     }
     else if (s_timer_running && s_remaining_seconds == 0)
@@ -196,7 +205,16 @@ static void update_display(void *context)
         vibes_double_pulse(); // Notify user
         text_layer_set_text(s_instruction_layer, "SELECT to close app");
         text_layer_set_text_color(s_timer_layer, GColorWhite);
-        snprintf(s_timer_text, sizeof(s_timer_text), "Brew Complete!");
+        if (WATCH_TYPE == SCREEN_TYPE_OG_RECT || WATCH_TYPE == SCREEN_TYPE_OG_ROUND)
+        {
+
+            snprintf(s_timer_text, sizeof(s_timer_text), "Brewing Done!");
+        }
+        else
+        {
+            snprintf(s_timer_text, sizeof(s_timer_text), "Brew Complete!");
+        }
+
         layer_mark_dirty(s_canvas_layer);
     }
     else
@@ -207,6 +225,8 @@ static void update_display(void *context)
         s_display_min = s_remaining_seconds / 60;
         s_display_sec = s_remaining_seconds % 60;
         text_layer_set_text(s_instruction_layer, "SELECT to start\nUP/DOWN to adjust");
+        // text_layer_set_text(s_instruction_layer, "");
+
         snprintf(s_timer_text, sizeof(s_timer_text), "Brew for %01d:%02d", s_display_min, s_display_sec);
     }
 
@@ -256,11 +276,29 @@ static void window_load(Window *window)
     text_layer_set_text_color(s_timer_layer, GColorWindsorTan);
     layer_add_child(window_layer, text_layer_get_layer(s_timer_layer));
 
-    s_instruction_layer = text_layer_create(GRect(0, bounds.size.h / 4 * 3, bounds.size.w, 50));
+
+    //bottom instruction layer
+    if (WATCH_TYPE == SCREEN_TYPE_OG_RECT)
+    {
+        s_instruction_layer = text_layer_create(GRect(0, bounds.size.h - 30, bounds.size.w, 50));
+    }
+    else
+    {
+        s_instruction_layer = text_layer_create(GRect(0, bounds.size.h / 4 * 3, bounds.size.w, 50));
+    }
+    // s_instruction_layer = text_layer_create(GRect(0, bounds.size.h / 4 * 3, bounds.size.w, 50));
     text_layer_set_text(s_instruction_layer, "SELECT to restart");
     text_layer_set_text_alignment(s_instruction_layer, GTextAlignmentCenter);
     text_layer_set_font(s_instruction_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
-    text_layer_set_background_color(s_instruction_layer, GColorClear);
+    if (PBL_IF_COLOR_ELSE(1,0))
+    {
+        text_layer_set_background_color(s_instruction_layer, GColorClear);
+    }
+    else
+    {
+        text_layer_set_background_color(s_instruction_layer, GColorWhite);
+    }
+
     layer_add_child(window_layer, text_layer_get_layer(s_instruction_layer));
 
     layer_add_child(window_layer, text_layer_get_layer(s_header_container_layer));
@@ -294,7 +332,7 @@ static void window_unload(Window *window)
 void timer_screen_push(void)
 {
     AppState *state = app_state_get();
-    state->brew_time_seconds = 300; // Default to 5 minutes
+    state->brew_time_seconds = 15; // Default to 300 sec
     s_remaining_seconds = state->brew_time_seconds;
     s_window = window_create();
     window_set_click_config_provider(s_window, click_config_provider);
