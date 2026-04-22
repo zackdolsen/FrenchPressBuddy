@@ -11,6 +11,7 @@ static TextLayer *s_instruction_layer;
 static TextLayer *s_header_layer;
 static TextLayer *s_header_container_layer;
 static TextLayer *s_bottom_header_layer;
+static TextLayer *s_bottom_container_layer;
 static TextLayer *s_water_header_layer;
 static TextLayer *s_water_value_layer;
 static TextLayer *s_coffee_header_layer;
@@ -21,36 +22,120 @@ static BitmapLayer *s_water_image_layer;
 static GBitmap *s_water_image;
 static BitmapLayer *s_coffee_image_layer;
 static GBitmap *s_coffee_image;
-static PropertyAnimation *s_water_image_animation;
-static PropertyAnimation *s_coffee_image_animation;
 static GRect s_water_image_target;
 static GRect s_coffee_image_target;
 
 // Color
 static GColor s_value_text_color = GColorWhite;
+static int move_direction; // 0 for up, 1 for down, 0 for right wiggle, 1 for left wiggle
 
 #define waterOzingrams 28.3495
 #define HEADER_HEIGHT PBL_IF_ROUND_ELSE(40, HEADER_HEIGHT_RECT)
 #define HEADER_PADDING PBL_IF_ROUND_ELSE(0, HEADER_HEIGHT_RECT)
 #define CENTER_V_OFFSET 20
+#define ANIMATION_DURATION 150
+#define ANIMATION_DISTANCE CENTER_V_OFFSET / 2
 #define WATCH_TYPE get_watch_type()
 
 // Forward declaration
 static void update_display(void);
 
 // animation
-static void animate_layer(Layer *layer, PropertyAnimation **anim, GRect target, int duration)
+
+static void anim_stopped(Animation *anim, bool finished, void *context)
 {
-    if (*anim)
+    animation_destroy(anim);
+}
+
+static void animate_layer(Layer *layer, GRect target, int duration)
+{
+    PropertyAnimation *anim = property_animation_create_layer_frame(layer, NULL, &target);
+
+    animation_set_duration((Animation *)anim, duration);
+    animation_set_curve((Animation *)anim, AnimationCurveEaseOut);
+
+    animation_set_handlers((Animation *)anim, (AnimationHandlers){.stopped = anim_stopped}, NULL);
+
+    animation_schedule((Animation *)anim);
+}
+
+static void wiggle_back()
+{
+    animate_layer(bitmap_layer_get_layer(s_coffee_image_layer), s_coffee_image_target, ANIMATION_DURATION / 2);
+}
+
+static void wiggle2()
+{
+    GRect coffee_up = s_coffee_image_target;
+
+    if (move_direction == 1)
     {
-        animation_destroy((Animation *)(*anim));
+        coffee_up.origin.x += ANIMATION_DISTANCE / 3;
+    }
+    else
+    {
+        coffee_up.origin.x -= ANIMATION_DISTANCE / 3;
     }
 
-    *anim = property_animation_create_layer_frame(layer, NULL, &target);
-    animation_set_duration((Animation *)(*anim), duration);
-    animation_set_curve((Animation *)(*anim), AnimationCurveEaseOut);
+    animate_layer(bitmap_layer_get_layer(s_coffee_image_layer), coffee_up, ANIMATION_DURATION);
 
-    animation_schedule((Animation *)(*anim));
+    app_timer_register(ANIMATION_DURATION, wiggle_back, NULL);
+}
+
+static void wiggle()
+{
+    GRect coffee_up = s_coffee_image_target;
+    if (move_direction == 1)
+    {
+        coffee_up.origin.x -= ANIMATION_DISTANCE / 3;
+    }
+    else
+    {
+        coffee_up.origin.x += ANIMATION_DISTANCE / 3;
+    }
+
+    animate_layer(bitmap_layer_get_layer(s_coffee_image_layer), coffee_up, ANIMATION_DURATION / 2);
+
+    app_timer_register(ANIMATION_DURATION / 2, wiggle2, NULL);
+
+    // psleep(ANIMATION_DURATION / 2);
+
+    // if (down == 1)
+    // {
+    //     coffee_up.origin.x += ANIMATION_DISTANCE;
+    // }
+    // else
+    // {
+    //     coffee_up.origin.x -= ANIMATION_DISTANCE;
+    // }
+
+    // animate_layer(bitmap_layer_get_layer(s_coffee_image_layer), coffee_up, ANIMATION_DURATION);
+
+    // psleep(ANIMATION_DURATION);
+    // animate_layer(bitmap_layer_get_layer(s_coffee_image_layer), s_coffee_image_target, ANIMATION_DURATION / 2);
+}
+
+static void bounce_back()
+{
+    animate_layer(bitmap_layer_get_layer(s_water_image_layer), s_water_image_target, ANIMATION_DURATION);
+}
+
+static void bounce()
+{
+    GRect water_up = s_water_image_target;
+
+    if (move_direction == 1)
+    {
+        water_up.origin.y += ANIMATION_DISTANCE;
+    }
+    else
+    {
+        water_up.origin.y -= ANIMATION_DISTANCE;
+    }
+
+    animate_layer(bitmap_layer_get_layer(s_water_image_layer), water_up, ANIMATION_DURATION);
+
+    app_timer_register(ANIMATION_DURATION, bounce_back, NULL);
 }
 
 // logic for determining coffee grams based on water oz and roast level
@@ -87,6 +172,9 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context)
     // Recalculate coffee: approximately 1.125g per oz (18g for 16oz)
     state->coffee_grams = (caulculate_coffee_grams(state, state->water_oz));
     update_display();
+    move_direction = 0;
+    bounce();
+    wiggle();
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context)
@@ -98,6 +186,9 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context)
         // Recalculate coffee: approximately 1.125g per oz (18g for 16oz)
         state->coffee_grams = (caulculate_coffee_grams(state, state->water_oz));
         update_display();
+        move_direction = 1;
+        bounce();
+        wiggle();
     }
 }
 
@@ -187,14 +278,16 @@ static void window_load(Window *window)
     layer_add_child(window_layer, text_layer_get_layer(s_coffee_value_layer));
 
     // water image layer
-    s_water_image_layer = bitmap_layer_create(GRect(0, bounds.size.h / 2 - water_image_bounds.size.h / 2, bounds.size.w / 2, water_image_bounds.size.h));
+    s_water_image_target = GRect(0, bounds.size.h / 2 - water_image_bounds.size.h / 2, bounds.size.w / 2, water_image_bounds.size.h);
+    s_water_image_layer = bitmap_layer_create(s_water_image_target);
     bitmap_layer_set_bitmap(s_water_image_layer, s_water_image);
     bitmap_layer_set_compositing_mode(s_water_image_layer, GCompOpSet);
     bitmap_layer_set_alignment(s_water_image_layer, GAlignCenter);
     layer_add_child(window_layer, bitmap_layer_get_layer(s_water_image_layer));
 
     // coffee image layer
-    s_coffee_image_layer = bitmap_layer_create(GRect(bounds.size.w / 2, bounds.size.h / 2 - coffee_image_bounds.size.h / 2, bounds.size.w / 2, coffee_image_bounds.size.h));
+    s_coffee_image_target = GRect(bounds.size.w / 2, bounds.size.h / 2 - coffee_image_bounds.size.h / 2, bounds.size.w / 2, coffee_image_bounds.size.h);
+    s_coffee_image_layer = bitmap_layer_create(s_coffee_image_target);
     bitmap_layer_set_bitmap(s_coffee_image_layer, s_coffee_image);
     bitmap_layer_set_compositing_mode(s_coffee_image_layer, GCompOpSet);
     bitmap_layer_set_alignment(s_coffee_image_layer, GAlignCenter);
@@ -203,25 +296,26 @@ static void window_load(Window *window)
     int bottom_text_start_height;
     int bottom_header_font_height = get_font_pixel_height(fonts_get_system_font(FONT_KEY_GOTHIC_24), "Based on Roast Level");
 
+    // bottom container layer for background of bottom header
+    if (WATCH_TYPE == SCREEN_TYPE_OG_RECT && PBL_IF_BW_ELSE(1, 0))
+    {
+        s_bottom_container_layer = text_layer_create(GRect(0, bounds.size.h - bottom_header_font_height, bounds.size.w, bottom_header_font_height + 10));
+        text_layer_set_background_color(s_bottom_container_layer, GColorBlack);
+        layer_add_child(window_layer, text_layer_get_layer(s_bottom_container_layer));
+    }
+
     // bottom header
-    if (WATCH_TYPE == SCREEN_TYPE_RECT_V2 || WATCH_TYPE == SCREEN_TYPE_ROUND_V2)
+    if (WATCH_TYPE == SCREEN_TYPE_RECT_V2 || WATCH_TYPE == SCREEN_TYPE_ROUND_V2) //newer larger watches
     {
         bottom_text_start_height = bounds.size.h / 2 + font_height + CENTER_V_OFFSET + coffee_image_bounds.size.h / 2;
     }
-    else if (WATCH_TYPE == SCREEN_TYPE_OG_ROUND)
+    else if (WATCH_TYPE == SCREEN_TYPE_OG_ROUND) // OG round
     {
         bottom_text_start_height = bounds.size.h - HEADER_HEIGHT;
     }
-    else // OG RECT
+     else //OG rect
     {
-        if (PBL_IF_COLOR_ELSE(1, 0))
-        {
-            bottom_text_start_height = bounds.size.h - HEADER_HEIGHT;
-        }
-        else
-        {
-            bottom_text_start_height = bounds.size.h - bottom_header_font_height;
-        }
+        bottom_text_start_height = bounds.size.h - bottom_header_font_height - CENTER_V_OFFSET/4;
     }
 
     s_bottom_header_layer = text_layer_create(GRect(0, bottom_text_start_height, bounds.size.w, HEADER_HEIGHT));
@@ -235,14 +329,7 @@ static void window_load(Window *window)
     }
     text_layer_set_text_alignment(s_bottom_header_layer, GTextAlignmentCenter);
     text_layer_set_font(s_bottom_header_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
-    if (PBL_IF_COLOR_ELSE(1, 0))
-    {
-        text_layer_set_background_color(s_bottom_header_layer, GColorClear);
-    }
-    else
-    {
-        text_layer_set_background_color(s_bottom_header_layer, GColorBlack);
-    }
+    text_layer_set_background_color(s_bottom_header_layer, GColorClear);
     // text_layer_set_background_color(s_bottom_header_layer, GColorClear);
     text_layer_set_text_color(s_bottom_header_layer, GColorWhite);
     text_layer_set_overflow_mode(s_bottom_header_layer, GTextOverflowModeTrailingEllipsis);
@@ -266,6 +353,16 @@ static void window_unload(Window *window)
     text_layer_destroy(s_water_value_layer);
     text_layer_destroy(s_coffee_value_layer);
     text_layer_destroy(s_bottom_header_layer);
+    text_layer_destroy(s_bottom_container_layer);
+
+    // if (s_water_image_animation)
+    // {
+    //     animation_destroy((Animation *)s_water_image_animation);
+    // }
+    // if (s_coffee_image_animation)
+    // {
+    //     animation_destroy((Animation *)s_coffee_image_animation);
+    // }
 
     bitmap_layer_destroy(s_water_image_layer);
     gbitmap_destroy(s_water_image);

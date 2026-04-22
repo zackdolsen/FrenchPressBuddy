@@ -290,15 +290,7 @@ static void window_load(Window *window)
     text_layer_set_text(s_instruction_layer, "SELECT to restart");
     text_layer_set_text_alignment(s_instruction_layer, GTextAlignmentCenter);
     text_layer_set_font(s_instruction_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
-    if (PBL_IF_COLOR_ELSE(1,0))
-    {
-        text_layer_set_background_color(s_instruction_layer, GColorClear);
-    }
-    else
-    {
-        text_layer_set_background_color(s_instruction_layer, GColorWhite);
-    }
-
+    text_layer_set_background_color(s_instruction_layer, GColorClear);
     layer_add_child(window_layer, text_layer_get_layer(s_instruction_layer));
 
     layer_add_child(window_layer, text_layer_get_layer(s_header_container_layer));
