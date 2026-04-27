@@ -32,9 +32,10 @@ static int move_direction; // 0 for up, 1 for down, 0 for right wiggle, 1 for le
 #define waterOzingrams 28.3495
 #define HEADER_HEIGHT PBL_IF_ROUND_ELSE(40, HEADER_HEIGHT_RECT)
 #define HEADER_PADDING PBL_IF_ROUND_ELSE(0, HEADER_HEIGHT_RECT)
-#define CENTER_V_OFFSET 20
+#define CENTER_V_OFFSET 18
+#define CENTER_Y_OFFSET 2 // text offset to center 
 #define ANIMATION_DURATION 150
-#define ANIMATION_DISTANCE CENTER_V_OFFSET / 2
+#define ANIMATION_DISTANCE 10
 #define WATCH_TYPE get_watch_type()
 
 // Forward declaration
@@ -244,7 +245,7 @@ static void window_load(Window *window)
     text_layer_set_overflow_mode(s_header_layer, GTextOverflowModeTrailingEllipsis);
 
     // water header layer
-    s_water_header_layer = text_layer_create(GRect(0, bounds.size.h / 2 - font_height / 2 - CENTER_V_OFFSET - water_image_bounds.size.h / 2, bounds.size.w / 2, font_height));
+    s_water_header_layer = text_layer_create(GRect(0, bounds.size.h / 2 - font_height / 2 - CENTER_V_OFFSET  - CENTER_Y_OFFSET - water_image_bounds.size.h / 2, bounds.size.w / 2, font_height));
     text_layer_set_text(s_water_header_layer, "Water");
     text_layer_set_text_alignment(s_water_header_layer, GTextAlignmentCenter);
     text_layer_set_font(s_water_header_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
@@ -253,7 +254,7 @@ static void window_load(Window *window)
     layer_add_child(window_layer, text_layer_get_layer(s_water_header_layer));
 
     // coffee header layer
-    s_coffee_header_layer = text_layer_create(GRect(bounds.size.w / 2, bounds.size.h / 2 - font_height / 2 - CENTER_V_OFFSET - coffee_image_bounds.size.h / 2, bounds.size.w / 2, font_height));
+    s_coffee_header_layer = text_layer_create(GRect(bounds.size.w / 2, bounds.size.h / 2 - font_height / 2 - CENTER_V_OFFSET - CENTER_Y_OFFSET - coffee_image_bounds.size.h / 2, bounds.size.w / 2, font_height));
     text_layer_set_text(s_coffee_header_layer, "Coffee");
     text_layer_set_text_alignment(s_coffee_header_layer, GTextAlignmentCenter);
     text_layer_set_font(s_coffee_header_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
@@ -262,7 +263,7 @@ static void window_load(Window *window)
     layer_add_child(window_layer, text_layer_get_layer(s_coffee_header_layer));
 
     // water value layer
-    s_water_value_layer = text_layer_create(GRect(0, bounds.size.h / 2 - font_height / 2 + CENTER_V_OFFSET + water_image_bounds.size.h / 2, bounds.size.w / 2, font_height));
+    s_water_value_layer = text_layer_create(GRect(0, bounds.size.h / 2 - font_height / 2 + CENTER_V_OFFSET - CENTER_Y_OFFSET+ water_image_bounds.size.h / 2, bounds.size.w / 2, font_height));
     text_layer_set_text_alignment(s_water_value_layer, GTextAlignmentCenter);
     text_layer_set_font(s_water_value_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
     text_layer_set_text_color(s_water_value_layer, s_value_text_color);
@@ -270,7 +271,7 @@ static void window_load(Window *window)
     layer_add_child(window_layer, text_layer_get_layer(s_water_value_layer));
 
     // coffee value layer
-    s_coffee_value_layer = text_layer_create(GRect(bounds.size.w / 2, bounds.size.h / 2 - font_height / 2 + CENTER_V_OFFSET + coffee_image_bounds.size.h / 2, bounds.size.w / 2, font_height));
+    s_coffee_value_layer = text_layer_create(GRect(bounds.size.w / 2, bounds.size.h / 2 - font_height / 2 + CENTER_V_OFFSET - CENTER_Y_OFFSET + coffee_image_bounds.size.h / 2 , bounds.size.w / 2, font_height));
     text_layer_set_text_alignment(s_coffee_value_layer, GTextAlignmentCenter);
     text_layer_set_font(s_coffee_value_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
     text_layer_set_text_color(s_coffee_value_layer, s_value_text_color);

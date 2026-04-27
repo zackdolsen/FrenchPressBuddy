@@ -1,7 +1,7 @@
 {
   "name": "FrenchPressBuddy",
   "author": "Dolsen Development",
-  "version": "1.1.0",
+  "version": "2.0",
   "keywords": ["pebble-app"],
   "private": true,
   "dependencies": {},
@@ -29,18 +29,8 @@
       "media": [
         {
           "type": "png",
-          "name": "COFFEE_ICON",
-          "file": "images/Coffee48.png"
-        },
-        {
-          "type": "png",
-          "name": "WATER_ICON",
-          "file": "images/Water48.png"
-        },
-        {
-          "type": "png",
           "name": "COFFEE_WHITE_ICON",
-          "file": "images/CoffeeWhite48.png",
+          "file": "images/Coffee48.png",
           "targetPlatforms": [
             "emery",
             "gabbro"          
@@ -49,7 +39,7 @@
         {
           "type": "png",
           "name": "COFFEE_WHITE_ICON",
-          "file": "images/CoffeeWhite36.png",
+          "file": "images/Coffee36.png",
           "targetPlatforms": [
             "aplite",
             "basalt",
@@ -60,18 +50,8 @@
         },
         {
           "type": "png",
-          "name": "WATER_WHITE_ICON",
-          "file": "images/WaterWhite48.png"
-        },
-        {
-          "type": "png",
-          "name": "COFFEE_COLOR_ICON",
-          "file": "images/CoffeeColor48.png"
-        },
-        {
-          "type": "png",
           "name": "WATER_COLOR_ICON",
-          "file": "images/WaterColor48.png",
+          "file": "images/Water48.png",
           "targetPlatforms": [
             "emery",
             "gabbro"          
@@ -80,7 +60,7 @@
           {
             "type": "png",
             "name": "WATER_COLOR_ICON",
-            "file": "images/WaterColor36.png",
+            "file": "images/Water36.png",
             "targetPlatforms": [
               "aplite",
               "basalt",
@@ -90,10 +70,26 @@
             ]
           },
         {
-          "type": "bitmap",
+          "type": "png",
           "name": "MENU_ICON",
-          "file": "images/AppIcon.png",
-          "menuIcon": true
+          "file": "images/MenuIcon.png",
+          "menuIcon": true,
+          "targetPlatforms": [
+            "basalt",
+            "chalk",
+            "emery",
+            "gabbro"          
+          ]
+        },
+        {
+          "type": "png",
+          "name": "MENU_ICON",
+          "file": "images/MenuIconBW.png",
+          "targetPlatforms": [
+            "aplite",
+            "diorite",
+            "flint"
+          ]
         }
       ]
     }

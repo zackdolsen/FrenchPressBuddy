@@ -196,7 +196,6 @@ static void update_display(void *context)
         // {
         //     text_layer_set_text(s_instruction_layer, "");
         // }
-        
     }
     else if (s_timer_running && s_remaining_seconds == 0)
     {
@@ -224,10 +223,18 @@ static void update_display(void *context)
         // get minutes and seconds for display
         s_display_min = s_remaining_seconds / 60;
         s_display_sec = s_remaining_seconds % 60;
-        text_layer_set_text(s_instruction_layer, "SELECT to start\nUP/DOWN to adjust");
-        // text_layer_set_text(s_instruction_layer, "");
+        // text_layer_set_text(s_instruction_layer, "SELECT to start\nUP/DOWN to adjust");
+        text_layer_set_text(s_instruction_layer, "");
 
-        snprintf(s_timer_text, sizeof(s_timer_text), "Brew for %01d:%02d", s_display_min, s_display_sec);
+        if (WATCH_TYPE == SCREEN_TYPE_RECT_V2)
+        {
+            snprintf(s_timer_text, sizeof(s_timer_text), "Brew for\n%01d:%02d", s_display_min, s_display_sec);
+        }
+        else
+        {
+            snprintf(s_timer_text, sizeof(s_timer_text), "Brew for %01d:%02d", s_display_min, s_display_sec);
+        }
+        // snprintf(s_timer_text, sizeof(s_timer_text), "Brew for\n%01d:%02d", s_display_min, s_display_sec);
     }
 
     // layer_mark_dirty(s_canvas_layer);
@@ -276,8 +283,7 @@ static void window_load(Window *window)
     text_layer_set_text_color(s_timer_layer, GColorWindsorTan);
     layer_add_child(window_layer, text_layer_get_layer(s_timer_layer));
 
-
-    //bottom instruction layer
+    // bottom instruction layer
     if (WATCH_TYPE == SCREEN_TYPE_OG_RECT)
     {
         s_instruction_layer = text_layer_create(GRect(0, bounds.size.h - 30, bounds.size.w, 50));
@@ -324,7 +330,7 @@ static void window_unload(Window *window)
 void timer_screen_push(void)
 {
     AppState *state = app_state_get();
-    state->brew_time_seconds = 15; // Default to 300 sec
+    state->brew_time_seconds = 300; // Default to 300 sec
     s_remaining_seconds = state->brew_time_seconds;
     s_window = window_create();
     window_set_click_config_provider(s_window, click_config_provider);
